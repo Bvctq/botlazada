@@ -1,0 +1,35 @@
+# Render Blueprint. Deploy: Render Dashboard -> New -> Blueprint -> chọn
+# repo Git chứa code này -> Render tự đọc file này và tạo service.
+#
+# Mặc định cấu hình theo phương án MIỄN PHÍ: Web Service (plan free) chạy
+# ở chế độ webhook. Có cold-start ~30-60s nếu bot im hơn 15 phút rồi có
+# người gửi tin nhắn lại - chấp nhận được với bot dùng cá nhân.
+#
+# Muốn ổn định hơn (không cold-start): đổi "type: web" -> "type: worker",
+# xoá phần envVars MODE/WEBHOOK_SECRET (không cần webhook nữa vì worker
+# dùng polling), xoá healthCheckPath. Background Worker KHÔNG có gói free
+# trên Render (tối thiểu gói Starter, ~7 USD/tháng). Xem README.md.
+services:
+  - type: web
+    name: lazada-aff-bot
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
+    # KHÔNG đặt healthCheckPath = /webhook: endpoint đó chỉ nhận POST từ
+    # Telegram (trả 405 cho GET), nên bị Render health-check GET sẽ báo lỗi.
+    # Để trống, Render tự kiểm tra bằng cách xem cổng PORT có mở hay không.
+    envVars:
+      - key: MODE
+        value: webhook
+      - key: WEBHOOK_SECRET
+        sync: false # tự đặt 1 chuỗi random chỉ gồm chữ/số/_/- (xem .env.example) -
+                    # KHÔNG dùng generateValue: true, giá trị Render tự sinh có thể
+                    # chứa '/' hoặc '=' mà Telegram không cho phép trong secret token
+      - key: BOT_TOKEN
+        sync: false
+      - key: ALLOWED_USER_IDS
+        sync: false
+      - key: LAZADA_CURL
+        sync: false

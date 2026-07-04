@@ -1,0 +1,6 @@
+# extras "webhooks" cần cho app.run_webhook() (kéo theo tornado) - dùng khi
+# MODE=webhook (mặc định khi deploy Web Service free trên Render).
+# Nếu chỉ chạy MODE=polling (Background Worker/local), có thể bỏ [webhooks]
+# nhưng để cả 2 cho code hoạt động với mọi MODE mà không cần đổi requirements.
+python-telegram-bot[webhooks]~=22.8
+requests~=2.32
