@@ -50,7 +50,16 @@ logger = logging.getLogger("lazada_aff_bot")
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]  # bắt buộc phải có, không đặt default
 _owner_env = os.environ.get("ALLOWED_USER_IDS", os.environ.get("OWNER_ID", ""))
-ALLOWED_USER_IDS = {int(x) for x in _owner_env.replace(" ", "").split(",") if x}
+try:
+    ALLOWED_USER_IDS = {int(x) for x in _owner_env.replace(" ", "").split(",") if x}
+except ValueError as e:
+    raise RuntimeError(
+        "Biến môi trường ALLOWED_USER_IDS phải là (các) số Telegram user ID, cách nhau "
+        "bằng dấu phẩy (vd: 111111111 hoặc 111111111,222222222). Giá trị hiện tại không "
+        f"hợp lệ ({e}). Có khả năng bạn dán nhầm nội dung khác (curl, cookie, token...) "
+        "vào biến này - vào Render -> service -> Environment kiểm tra lại từng biến "
+        "(BOT_TOKEN, ALLOWED_USER_IDS, LAZADA_CURL) xem có bị lẫn giá trị không."
+    ) from e
 LAZADA_APP_KEY = os.environ.get("LAZADA_APP_KEY", "24677475")
 
 # state đơn giản trong RAM: những user_id nào đang ở giữa luồng /setsession
